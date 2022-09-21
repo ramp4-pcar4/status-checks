@@ -1,0 +1,42 @@
+name: 'Run status checks!'
+description: 'This action will run eslint, prettier, and TS checks'
+author: 'Miles Petrov <miles.petrov@ec.gc.ca>'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+branding:
+  icon: 'git-commit'
+  color: 'orange'
+inputs:
+  gh-token:
+    description: >
+      Provide your GITHUB_TOKEN for api calls.
+    required: true
+
+  compare:
+    description: >
+      Causes pull request status checks to be compared against the head branch status checks so only new errors 
+      can cause the workflow to fail. Default is true.
+    required: false
+    default: true
+
+  ts-errors:
+    description: >
+      This option sets the number of TypeScript errors allowed before failing the code. 
+
+      The default is 0. If the `compare` input is true (default) and this is a pull request
+      negative values can be used. This is useful if you wish to reduce errors over time.
+    required: false
+    default: 0
+
+  ts-command:
+    description: >
+      The command to run typescript checking.
+
+      Default is `npm run typecheck`.
+    required: false
+    default: 'npm run typecheck'
+
+outputs:
+  ts-errors:
+    description: 'The number of typescript type errors.'

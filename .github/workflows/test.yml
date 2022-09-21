@@ -1,0 +1,20 @@
+name: 'Test things'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+  workflow_dispatch:
+
+jobs:
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: install npm dependencies
+        run: yarn
+      - uses: milespetrov/status-checks@main
+        with:
+          ts-errors: 0
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
