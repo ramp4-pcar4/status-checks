@@ -38494,6 +38494,339 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("zlib");
 
 /***/ }),
 
+/***/ 1046:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "P": () => (/* binding */ createAction)
+/* harmony export */ });
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
+/* harmony import */ var _lib_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(223);
+
+
+
+const ghToken = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('gh-token') || process.env.GH_TOKEN || '';
+const createAction = () => ({
+    octokit: (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)(ghToken),
+    inputs: {
+        compare: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('compare'))
+            ? (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('compare').toLowerCase() === 'true'
+            : true,
+        tsErrors: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ts-errors'))
+            ? Number.parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ts-errors'))
+            : 0,
+        tsCommand: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ts-command'))
+            ? (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('ts-command')
+            : 'npm run typecheck',
+        lintCommand: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-command'))
+            ? (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-command')
+            : 'npm run lintcheck',
+        lintErrors: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-errors'))
+            ? Number.parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-errors'))
+            : 0,
+        lintWarnings: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-warnings'))
+            ? Number.parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('lint-warnings'))
+            : 0,
+        formatCommand: !(0,_lib_js__WEBPACK_IMPORTED_MODULE_2__/* .isNullOrUndefined */ .le)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('format-command'))
+            ? (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('format-command')
+            : 'npm run formatcheck'
+    },
+    isPR: !!_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request,
+    ref: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request
+        ? _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request.head.ref
+        : _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.ref,
+    sha: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request
+        ? _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request.head.sha
+        : _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.sha,
+    baseSha: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request
+        ? _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request.base.sha
+        : _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.before,
+    baseRepo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request
+        ? _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request.base.repo.name
+        : _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.repository.name || '',
+    baseOwner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request
+        ? _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.pull_request.base.user.login
+        : _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload.repository.owner.name || '',
+    previousResults: null
+});
+
+
+/***/ }),
+
+/***/ 223:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "le": () => (/* binding */ isNullOrUndefined),
+/* harmony export */   "sW": () => (/* binding */ results),
+/* harmony export */   "U4": () => (/* binding */ findAndExtractArtifact)
+/* harmony export */ });
+/* harmony import */ var download__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7490);
+/* harmony import */ var node_stream_zip__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8119);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2186);
+
+
+
+const isNullOrUndefined = (value) => typeof value === 'undefined' || value === null || value === '';
+const results = {
+    ts: {
+        errors: 0
+    },
+    lint: {
+        errors: 0,
+        warnings: 0
+    },
+    prettierWarning: false
+};
+async function findAndExtractArtifact(action) {
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_2__.info)(`Looking for latest upload of ${action.baseSha}`);
+    const location = await findLatestArtifact(action.baseSha, action.baseRepo, action.baseOwner, action.octokit);
+    if (location) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_2__.info)(`Found ${action.baseSha}. Downloading and extracting...`);
+        const stringContents = await downloadAndExtract(location, 'status-results.json', action.baseSha);
+        return JSON.parse(stringContents);
+    }
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_2__.notice)(`Did not find any artifacts by name: ${action.baseSha}`);
+    return null;
+}
+// Searches for the latest version of an artifact, unarchives the artifact, streams the contents of the "filename" to a string and returns it
+async function findLatestArtifact(artifactName, repo, owner, octokit) {
+    // Find latest archive
+    const res = await octokit.rest.actions.listArtifactsForRepo({ owner, repo });
+    const sorted = res.data.artifacts
+        .filter(a => a.name === artifactName)
+        // @ts-ignore
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    if (sorted.length) {
+        // Find file location
+        const { id } = sorted[0];
+        const res1 = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}', {
+            owner,
+            repo,
+            artifact_id: id,
+            archive_format: 'zip'
+        });
+        return res1.url;
+    }
+    return null;
+}
+// Writes artifact archive to disk, unarchives and streams contents to a string variable
+async function downloadAndExtract(url, filename, artifactName) {
+    await download__WEBPACK_IMPORTED_MODULE_0__(url, 'tmp');
+    const zip = new node_stream_zip__WEBPACK_IMPORTED_MODULE_1__.async({ file: `tmp/${artifactName}.zip` });
+    const stm = await zip.stream(filename);
+    return await streamToString(stm);
+}
+function streamToString(stream) {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('error', (err) => reject(err));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    });
+}
+
+
+/***/ }),
+
+/***/ 2265:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "K": () => (/* binding */ run)
+/* harmony export */ });
+/* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1514);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
+
+
+async function run(action) {
+    let results = await lintCheck(action.inputs.lintCommand);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Lint Results: ${results.errors} errors, ${results.warnings} warnings`);
+    if (action.inputs.compare && action.isPR) {
+        results = await compareOutput(results, action);
+    }
+    if (results.errors > action.inputs.lintErrors ||
+        results.warnings > action.inputs.lintWarnings) {
+        results.failed = true;
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.warning)('Lint check failed!');
+    }
+    else {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.notice)(`Lint check has passed!`);
+    }
+    return results;
+}
+async function compareOutput(results, action) {
+    if (action.previousResults) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Previous Lint Results: ${action.previousResults.lint.errors} errors, ${action.previousResults.lint.warnings} warnings`);
+        return {
+            errors: results.errors - action.previousResults.lint.errors,
+            warnings: results.warnings - action.previousResults.lint.warnings,
+            failed: results.failed
+        };
+    }
+    return results;
+}
+async function lintCheck(command) {
+    const result = await _actions_exec__WEBPACK_IMPORTED_MODULE_0__.getExecOutput(command, [], {
+        ignoreReturnCode: true,
+        silent: true
+    });
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup)('Lint Output');
+    console.log(result.stdout);
+    console.log(result.stderr);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.endGroup)();
+    const regex = /\((\d+) errors, (\d+) warnings\)/gm;
+    let m;
+    let output = { errors: 0, warnings: 0, failed: false };
+    if ((m = regex.exec(result.stdout)) !== null) {
+        output.errors = parseInt(m[1]);
+        output.warnings = parseInt(m[2]);
+    }
+    return output;
+}
+
+
+/***/ }),
+
+/***/ 2092:
+/***/ ((__webpack_module__, __unused_webpack___webpack_exports__, __nccwpck_require__) => {
+
+__nccwpck_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__) => {
+/* harmony import */ var _ts_check_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(9561);
+/* harmony import */ var _lint_check_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2265);
+/* harmony import */ var _prettier_check_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(8594);
+/* harmony import */ var _actions_artifact__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2605);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(2186);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(7147);
+/* harmony import */ var _lib_js__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(223);
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(1046);
+
+
+
+
+
+
+
+
+const action = (0,_constants_js__WEBPACK_IMPORTED_MODULE_7__/* .createAction */ .P)();
+const artifactClient = _actions_artifact__WEBPACK_IMPORTED_MODULE_3__.create();
+try {
+    action.previousResults = await (0,_lib_js__WEBPACK_IMPORTED_MODULE_6__/* .findAndExtractArtifact */ .U4)(action);
+}
+catch {
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.warning)('The head branch is missing status data, cannot compare this PR.');
+}
+// Run everything in parallel
+const tsR = (0,_ts_check_js__WEBPACK_IMPORTED_MODULE_0__/* .run */ .K)(action);
+const lintR = (0,_lint_check_js__WEBPACK_IMPORTED_MODULE_1__/* .run */ .K)(action);
+const prettierR = (0,_prettier_check_js__WEBPACK_IMPORTED_MODULE_2__/* .run */ .K)(action);
+const tsResults = await tsR;
+const lintResults = await lintR;
+const prettierResults = await prettierR;
+_lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.ts.errors */ .sW.ts.errors = tsResults.errors;
+_lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.lint */ .sW.lint = lintResults;
+_lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.prettierWarning */ .sW.prettierWarning = prettierResults.failed;
+fs__WEBPACK_IMPORTED_MODULE_5__.writeFileSync('status-results.json', JSON.stringify(_lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results */ .sW));
+await artifactClient.uploadArtifact(action.sha, ['status-results.json'], '.');
+(0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.setOutput)('ts-errors', _lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.ts.errors */ .sW.ts.errors);
+(0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.setOutput)('lint-errors', _lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.lint.errors */ .sW.lint.errors);
+(0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.setOutput)('lint-warnings', _lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.lint.warnings */ .sW.lint.warnings);
+(0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.setOutput)('format-status', _lib_js__WEBPACK_IMPORTED_MODULE_6__/* .results.prettierWarning */ .sW.prettierWarning);
+if (tsResults.failed || lintResults.failed || prettierResults.failed) {
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_4__.setFailed)(`One or more checks failed. Please check the annotations for more details.`);
+}
+
+__webpack_handle_async_dependencies__();
+}, 1);
+
+/***/ }),
+
+/***/ 8594:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "K": () => (/* binding */ run)
+/* harmony export */ });
+/* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1514);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
+
+
+async function run(action) {
+    const result = await _actions_exec__WEBPACK_IMPORTED_MODULE_0__.getExecOutput(action.inputs.formatCommand, [], {
+        ignoreReturnCode: true
+    });
+    const regex = /\[warn\]/gm;
+    let m;
+    let output = { failed: false };
+    if ((m = regex.exec(result.stdout)) !== null) {
+        output.failed = true;
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.warning)('Prettier check failed!');
+    }
+    else {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.notice)(`Prettier check has passed!`);
+    }
+    return output;
+}
+
+
+/***/ }),
+
+/***/ 9561:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "K": () => (/* binding */ run)
+/* harmony export */ });
+/* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1514);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
+
+
+async function run(action) {
+    const results = await tsCheck(action.inputs.tsCommand);
+    let errorCount = results.errors;
+    if (action.inputs.compare && action.isPR) {
+        errorCount = await compareErrors(errorCount, action);
+    }
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Error count: ${errorCount} \n Action Errors: ${action.inputs.tsErrors}`);
+    if (errorCount > action.inputs.tsErrors) {
+        results.failed = true;
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.warning)('TypeScript check failed!');
+    }
+    else {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.notice)(`Typescript check has passed!`);
+    }
+    return results;
+}
+async function compareErrors(errorCount, action) {
+    if (action.previousResults) {
+        (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.info)(`Previous errors: ${action.previousResults.ts.errors}`);
+        return errorCount - action.previousResults.ts.errors;
+    }
+    return errorCount;
+}
+async function tsCheck(command) {
+    const result = await _actions_exec__WEBPACK_IMPORTED_MODULE_0__.getExecOutput(command, [], {
+        ignoreReturnCode: true,
+        silent: true
+    });
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup)('TypeScript Output');
+    console.log(result.stdout);
+    console.log(result.stderr);
+    (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.endGroup)();
+    const regex = /Found (\d+) errors?( in (\d+) files?)?/gm;
+    let m;
+    let output = { errors: 0, files: 0, failed: false };
+    if ((m = regex.exec(result.stdout)) !== null) {
+        output.errors = parseInt(m[1]);
+        output.files = parseInt(m[2]);
+    }
+    return output;
+}
+
+
+/***/ }),
+
 /***/ 4046:
 /***/ ((module) => {
 
@@ -38555,178 +38888,108 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ }
 /******/ 
 /************************************************************************/
+/******/ /* webpack/runtime/async module */
+/******/ (() => {
+/******/ 	var webpackThen = typeof Symbol === "function" ? Symbol("webpack then") : "__webpack_then__";
+/******/ 	var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
+/******/ 	var completeQueue = (queue) => {
+/******/ 		if(queue) {
+/******/ 			queue.forEach((fn) => (fn.r--));
+/******/ 			queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
+/******/ 		}
+/******/ 	}
+/******/ 	var completeFunction = (fn) => (!--fn.r && fn());
+/******/ 	var queueFunction = (queue, fn) => (queue ? queue.push(fn) : completeFunction(fn));
+/******/ 	var wrapDeps = (deps) => (deps.map((dep) => {
+/******/ 		if(dep !== null && typeof dep === "object") {
+/******/ 			if(dep[webpackThen]) return dep;
+/******/ 			if(dep.then) {
+/******/ 				var queue = [];
+/******/ 				dep.then((r) => {
+/******/ 					obj[webpackExports] = r;
+/******/ 					completeQueue(queue);
+/******/ 					queue = 0;
+/******/ 				});
+/******/ 				var obj = {};
+/******/ 											obj[webpackThen] = (fn, reject) => (queueFunction(queue, fn), dep['catch'](reject));
+/******/ 				return obj;
+/******/ 			}
+/******/ 		}
+/******/ 		var ret = {};
+/******/ 							ret[webpackThen] = (fn) => (completeFunction(fn));
+/******/ 							ret[webpackExports] = dep;
+/******/ 							return ret;
+/******/ 	}));
+/******/ 	__nccwpck_require__.a = (module, body, hasAwait) => {
+/******/ 		var queue = hasAwait && [];
+/******/ 		var exports = module.exports;
+/******/ 		var currentDeps;
+/******/ 		var outerResolve;
+/******/ 		var reject;
+/******/ 		var isEvaluating = true;
+/******/ 		var nested = false;
+/******/ 		var whenAll = (deps, onResolve, onReject) => {
+/******/ 			if (nested) return;
+/******/ 			nested = true;
+/******/ 			onResolve.r += deps.length;
+/******/ 			deps.map((dep, i) => (dep[webpackThen](onResolve, onReject)));
+/******/ 			nested = false;
+/******/ 		};
+/******/ 		var promise = new Promise((resolve, rej) => {
+/******/ 			reject = rej;
+/******/ 			outerResolve = () => (resolve(exports), completeQueue(queue), queue = 0);
+/******/ 		});
+/******/ 		promise[webpackExports] = exports;
+/******/ 		promise[webpackThen] = (fn, rejectFn) => {
+/******/ 			if (isEvaluating) { return completeFunction(fn); }
+/******/ 			if (currentDeps) whenAll(currentDeps, fn, rejectFn);
+/******/ 			queueFunction(queue, fn);
+/******/ 			promise['catch'](rejectFn);
+/******/ 		};
+/******/ 		module.exports = promise;
+/******/ 		body((deps) => {
+/******/ 			if(!deps) return outerResolve();
+/******/ 			currentDeps = wrapDeps(deps);
+/******/ 			var fn, result;
+/******/ 			var promise = new Promise((resolve, reject) => {
+/******/ 				fn = () => (resolve(result = currentDeps.map((d) => (d[webpackExports]))));
+/******/ 				fn.r = 0;
+/******/ 				whenAll(currentDeps, fn, reject);
+/******/ 			});
+/******/ 			return fn.r ? promise : result;
+/******/ 		}).then(outerResolve, reject);
+/******/ 		isEvaluating = false;
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/define property getters */
+/******/ (() => {
+/******/ 	// define getter functions for harmony exports
+/******/ 	__nccwpck_require__.d = (exports, definition) => {
+/******/ 		for(var key in definition) {
+/******/ 			if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 			}
+/******/ 		}
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/hasOwnProperty shorthand */
+/******/ (() => {
+/******/ 	__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ })();
+/******/ 
 /******/ /* webpack/runtime/compat */
 /******/ 
 /******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
 /******/ 
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __nccwpck_require__(1514);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@actions/artifact/lib/artifact-client.js
-var artifact_client = __nccwpck_require__(2605);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(7147);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
-// EXTERNAL MODULE: ./node_modules/download/index.js
-var download = __nccwpck_require__(7490);
-// EXTERNAL MODULE: ./node_modules/node-stream-zip/node_stream_zip.js
-var node_stream_zip = __nccwpck_require__(8119);
-;// CONCATENATED MODULE: ./lib/lib.js
-
-
-
-const isNullOrUndefined = (value) => typeof value === 'undefined' || value === null || value === '';
-async function findAndExtractArtifact(action) {
-    (0,core.info)(`Looking for latest upload of ${action.baseSha}`);
-    (0,core.info)(`${action.baseRepo} ${action.baseOwner} ${action.octokit}`);
-    const location = await findLatestArtifact(action.baseSha, action.baseRepo, action.baseOwner, action.octokit);
-    if (location) {
-        (0,core.info)(`Found ${action.baseSha}. Downloading and extracting...`);
-        const stringContents = await downloadAndExtract(location, 'status-results.json', action.baseSha);
-        return JSON.parse(stringContents);
-    }
-    (0,core.notice)(`Did not find any artifacts by name: ${action.baseSha}`);
-    return null;
-}
-// Searches for the latest version of an artifact, unarchives the artifact, streams the contents of the "filename" to a string and returns it
-async function findLatestArtifact(artifactName, repo, owner, octokit) {
-    // Find latest archive
-    const res = await octokit.rest.actions.listArtifactsForRepo({ owner, repo });
-    console.log(res);
-    const sorted = res.data.artifacts
-        .filter(a => a.name === artifactName)
-        // @ts-ignore
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    console.log(sorted);
-    if (sorted.length) {
-        // Find file location
-        const { id } = sorted[0];
-        const res1 = await octokit.request('GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}', {
-            owner,
-            repo,
-            artifact_id: id,
-            archive_format: 'zip'
-        });
-        return res1.url;
-    }
-    return null;
-}
-// Writes artifact archive to disk, unarchives and streams contents to a string variable
-async function downloadAndExtract(url, filename, artifactName) {
-    await download(url, 'tmp');
-    const zip = new node_stream_zip.async({ file: `tmp/${artifactName}.zip` });
-    const stm = await zip.stream(filename);
-    return await streamToString(stm);
-}
-function streamToString(stream) {
-    const chunks = [];
-    return new Promise((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-        stream.on('error', (err) => reject(err));
-        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    });
-}
-
-;// CONCATENATED MODULE: ./lib/constants.js
-
-
-
-const ghToken = (0,core.getInput)('gh-token') || process.env.GH_TOKEN || '';
-const createAction = () => ({
-    octokit: (0,github.getOctokit)(ghToken),
-    inputs: {
-        compare: !isNullOrUndefined((0,core.getInput)('compare'))
-            ? (0,core.getInput)('compare').toLowerCase() === 'true'
-            : true,
-        tsErrors: !isNullOrUndefined((0,core.getInput)('ts-errors'))
-            ? Number.parseInt((0,core.getInput)('ts-errors'))
-            : 0,
-        tsCommand: !isNullOrUndefined((0,core.getInput)('ts-command'))
-            ? (0,core.getInput)('ts-command')
-            : 'npm run typecheck'
-    },
-    isPR: !!github.context.payload.pull_request,
-    ref: github.context.payload.pull_request
-        ? github.context.payload.pull_request.head.ref
-        : github.context.ref,
-    sha: github.context.payload.pull_request
-        ? github.context.payload.pull_request.head.sha
-        : github.context.sha,
-    baseSha: github.context.payload.pull_request
-        ? github.context.payload.pull_request.base.sha
-        : '',
-    baseRepo: github.context.payload.pull_request
-        ? github.context.payload.pull_request.base.repo.name
-        : '',
-    baseOwner: github.context.payload.pull_request
-        ? github.context.payload.pull_request.base.user.login
-        : ''
-});
-
-;// CONCATENATED MODULE: ./lib/ts-check.js
-
-
-
-
-
-
-const RESULT_FILE = 'status-results.json';
-const artifactClient = artifact_client.create();
-async function run(action = createAction()) {
-    const results = await tsCheck(action.inputs.tsCommand);
-    let errorCount = results.errors;
-    (0,core.info)(`Compare: ${action.inputs.compare} \nPR:${action.isPR}`);
-    if (action.inputs.compare && action.isPR) {
-        errorCount = await compareErrors(errorCount, action);
-    }
-    (0,core.info)(`Error count: ${errorCount} \n Action Errors: ${action.inputs.tsErrors}`);
-    if (errorCount > action.inputs.tsErrors) {
-        (0,core.setFailed)(`Too many TypeScript errors! There were ${results.errors} errors but only ${action.inputs.tsErrors} are allowed.`);
-    }
-    else {
-        (0,core.info)(`Typescript check has passed!`);
-    }
-    external_fs_.writeFileSync(RESULT_FILE, JSON.stringify(results));
-    await artifactClient.uploadArtifact(action.sha, [RESULT_FILE], '.');
-    (0,core.setOutput)('ts-errors', results.errors);
-    return results;
-}
-async function compareErrors(errorCount, action) {
-    try {
-        const results = await findAndExtractArtifact(action);
-        return errorCount - results.errors;
-    }
-    catch {
-        (0,core.warning)('The head branch is missing status data, cannot compare this PR.');
-        return errorCount;
-    }
-}
-async function tsCheck(command) {
-    const result = await exec.getExecOutput(command, [], {
-        ignoreReturnCode: true
-    });
-    const regex = /Found (\d+) errors?( in (\d+) files?)?/gm;
-    let m;
-    let output = { errors: 0, files: 0 };
-    if ((m = regex.exec(result.stdout)) !== null) {
-        output.errors = parseInt(m[1]);
-        output.files = parseInt(m[2]);
-    }
-    return output;
-}
-
-;// CONCATENATED MODULE: ./lib/main.js
-
-run();
-
-})();
-
+/******/ 
+/******/ // startup
+/******/ // Load entry module and return exports
+/******/ // This entry module used 'module' so it can't be inlined
+/******/ var __webpack_exports__ = __nccwpck_require__(2092);
+/******/ __webpack_exports__ = await __webpack_exports__;
+/******/ 
 
 //# sourceMappingURL=index.js.map

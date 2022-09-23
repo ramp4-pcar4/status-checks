@@ -7,9 +7,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc && ncc build --source-map",
-    "typecheck": "tsc --pretty",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
+    "typecheck": "tsc ./src/bad-file.ts --pretty",
+    "prettiercheck": "prettier . -c",
+    "lintcheck": "echo '187 problems (93 errors, 94 warnings)'",
+    "format": "prettier --write .",
     "lint": "eslint src/**/*.ts",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },

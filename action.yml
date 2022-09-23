@@ -37,6 +37,49 @@ inputs:
     required: false
     default: 'npm run typecheck'
 
+  lint-errors:
+    description: >
+      This option sets the number of ESLint errors allowed before failing the code. 
+
+      The default is 0. If the `compare` input is true (default) and this is a pull request
+      negative values can be used. This is useful if you wish to reduce errors over time.
+    required: false
+    default: 0
+
+  lint-command:
+    description: >
+      The command to run ESLint checking.
+
+      Default is `npm run lintcheck`.
+    required: false
+    default: 'npm run lintcheck'
+
+  lint-warnings:
+    description: >
+      This option sets the number of ESLint warnings allowed before failing the code. 
+
+      The default is 0. If the `compare` input is true (default) and this is a pull request
+      negative values can be used. This is useful if you wish to reduce errors over time.
+    required: false
+    default: 0
+
+  format-command:
+    description: >
+      The command to run Prettier checking.
+
+      Default is `npm run formatcheck`.
+    required: false
+    default: 'npm run formatcheck'
+
 outputs:
   ts-errors:
     description: 'The number of typescript type errors.'
+
+  lint-errors:
+    description: 'The number of eslint errors.'
+
+  lint-warnings:
+    description: 'The number of eslint warnings.'
+
+  format-status:
+    description: 'Whether the code is formatted or not.'
