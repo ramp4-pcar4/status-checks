@@ -1,7 +1,7 @@
 import download from 'download'
 import StreamZip from 'node-stream-zip'
-import type {Octokit, ActionInterface} from './constants.js'
-import {info, notice} from '@actions/core'
+import type { Octokit, ActionInterface } from './constants.js'
+import { info, notice } from '@actions/core'
 
 export const isNullOrUndefined = (
   value: unknown
@@ -50,14 +50,14 @@ async function findLatestArtifact(
   octokit: Octokit
 ) {
   // Find latest archive
-  const res = await octokit.rest.actions.listArtifactsForRepo({owner, repo})
+  const res = await octokit.rest.actions.listArtifactsForRepo({ owner, repo })
   const sorted = res.data.artifacts
     .filter(a => a.name === artifactName)
     // @ts-ignore
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   if (sorted.length) {
     // Find file location
-    const {id} = sorted[0]
+    const { id } = sorted[0]
     const res1 = await octokit.request(
       'GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}',
       {
@@ -81,7 +81,7 @@ async function downloadAndExtract(
   artifactName: string
 ) {
   await download(url, 'tmp')
-  const zip = new StreamZip.async({file: `tmp/${artifactName}.zip`})
+  const zip = new StreamZip.async({ file: `tmp/${artifactName}.zip` })
   const stm = await zip.stream(filename)
   return await streamToString(stm)
 }

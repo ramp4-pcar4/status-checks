@@ -1,15 +1,16 @@
 import exec from '@actions/exec'
-import {notice, warning} from '@actions/core'
-import type {ActionInterface, PrettierResults} from './constants.js'
+import { notice, warning } from '@actions/core'
+import type { ActionInterface, PrettierResults } from './constants.js'
 
 export async function run(action: ActionInterface): Promise<PrettierResults> {
   const result = await exec.getExecOutput(action.inputs.formatCommand, [], {
-    ignoreReturnCode: true
+    ignoreReturnCode: true,
+    silent: true
   })
 
-  const regex = /\[warn\]/gm
+  const regex = /\[(warn|error)\]/gm
   let m
-  let output: PrettierResults = {failed: false}
+  let output: PrettierResults = { failed: false }
 
   if ((m = regex.exec(result.stdout)) !== null) {
     output.failed = true

@@ -1,7 +1,7 @@
-import {getInput} from '@actions/core'
-import {context, getOctokit} from '@actions/github'
-import {isNullOrUndefined} from './lib.js'
-import type {findAndExtractArtifact, results} from './lib.js'
+import { getInput } from '@actions/core'
+import { context, getOctokit } from '@actions/github'
+import { isNullOrUndefined } from './lib.js'
+import type { findAndExtractArtifact, results } from './lib.js'
 const ghToken = getInput('gh-token') || process.env.GH_TOKEN || ''
 
 export interface TypeScriptResults {

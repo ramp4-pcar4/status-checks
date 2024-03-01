@@ -1,7 +1,7 @@
-import type {ArtifactClient} from '@actions/artifact'
-import {getExecOutput} from '@actions/exec'
-import {jest} from '@jest/globals'
-import type {ActionInterface} from '../src/constants'
+import type { ArtifactClient } from '@actions/artifact'
+import { getExecOutput } from '@actions/exec'
+import { jest } from '@jest/globals'
+import type { ActionInterface } from '../src/constants'
 jest.setTimeout(50000)
 
 const context = {
@@ -51,7 +51,7 @@ jest.unstable_mockModule('../src/lib.ts', () => {
     ...originalLib,
     findAndExtractArtifact: jest.fn((action: ActionInterface) => {
       console.error(action)
-      return {errors: action._tests?.originErrors || 0, files: 0}
+      return { errors: action._tests?.originErrors || 0, files: 0 }
     })
   }
 })

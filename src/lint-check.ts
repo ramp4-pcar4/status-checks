@@ -1,12 +1,12 @@
 import exec from '@actions/exec'
-import {info, warning, startGroup, endGroup, notice} from '@actions/core'
-import type {ActionInterface, LintResults} from './constants.js'
+import { info, warning, startGroup, endGroup, notice } from '@actions/core'
+import type { ActionInterface, LintResults } from './constants.js'
 
 export async function run(action: ActionInterface): Promise<LintResults> {
   let results = await lintCheck(action.inputs.lintCommand)
   info(`Lint Results: ${results.errors} errors, ${results.warnings} warnings`)
 
-  if (action.inputs.compare && action.isPR) {
+  if (action.inputs.compare) {
     results = await compareOutput(results, action)
   }
 
@@ -40,22 +40,27 @@ async function compareOutput(
 }
 
 async function lintCheck(command: string): Promise<LintResults> {
-  const result = await exec.getExecOutput(command, [], {
+  const result = await exec.getExecOutput(`${command} --format=json`, [], {
     ignoreReturnCode: true,
     silent: true
   })
+
   startGroup('Lint Output')
   console.log(result.stdout)
   console.log(result.stderr)
   endGroup()
 
-  const regex = /\((\d+) errors, (\d+) warnings\)/gm
-  let m
-  let output: LintResults = {errors: 0, warnings: 0, failed: false}
+  let output: LintResults = { errors: 0, warnings: 0, failed: false }
 
-  if ((m = regex.exec(result.stdout)) !== null) {
-    output.errors = parseInt(m[1])
-    output.warnings = parseInt(m[2])
+  try {
+    const jsonOutput = JSON.parse(result.stdout)
+    for (const file of jsonOutput) {
+      output.errors += file.errorCount
+      output.warnings += file.warningCount
+    }
+  } catch (error) {
+    console.error('Failed to parse ESLint output:', error)
   }
+
   return output
 }

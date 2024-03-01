@@ -1,14 +1,14 @@
-import {run as tsRun} from './ts-check.js'
-import {run as lintRun} from './lint-check.js'
-import {run as prettierRun} from './prettier-check.js'
-import artifact from '@actions/artifact'
-import {warning, setFailed, setOutput} from '@actions/core'
+import { run as tsRun } from './ts-check.js'
+import { run as lintRun } from './lint-check.js'
+import { run as prettierRun } from './prettier-check.js'
+import { DefaultArtifactClient } from '@actions/artifact'
+import { warning, setFailed, setOutput } from '@actions/core'
 import fs from 'fs'
-import {findAndExtractArtifact, results} from './lib.js'
-import {createAction} from './constants.js'
+import { findAndExtractArtifact, results } from './lib.js'
+import { createAction } from './constants.js'
 
 const action = createAction()
-const artifactClient = artifact.create()
+const artifactClient = new DefaultArtifactClient()
 
 try {
   action.previousResults = await findAndExtractArtifact(action)
