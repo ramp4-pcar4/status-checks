@@ -1,4 +1,4 @@
-import exec from '@actions/exec'
+import { getExecOutput } from '@actions/exec'
 import { info, warning, startGroup, endGroup, notice } from '@actions/core'
 import type { ActionInterface, TypeScriptResults } from './constants.js'
 
@@ -7,10 +7,10 @@ export async function run(action: ActionInterface): Promise<TypeScriptResults> {
   let errorCount = results.errors
 
   if (action.inputs.compare) {
-    errorCount = await compareErrors(errorCount, action)
+    errorCount = await compareErrors(results.errors, action)
   }
 
-  info(`Error count: ${errorCount} \n Action Errors: ${action.inputs.tsErrors}`)
+  info(`Error count: ${results.errors}`)
   if (errorCount > action.inputs.tsErrors) {
     results.failed = true
     warning('TypeScript check failed!')
@@ -33,7 +33,7 @@ async function compareErrors(
 }
 
 async function tsCheck(command: string): Promise<TypeScriptResults> {
-  const result = await exec.getExecOutput(command, [], {
+  const result = await getExecOutput(command, [], {
     ignoreReturnCode: true
   })
   startGroup('TypeScript Output')

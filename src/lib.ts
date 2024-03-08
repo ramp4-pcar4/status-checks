@@ -1,5 +1,5 @@
-import download from 'download'
-import StreamZip from 'node-stream-zip'
+import * as download from 'download'
+import * as StreamZip from 'node-stream-zip'
 import type { Octokit, ActionInterface } from './constants.js'
 import { info, notice } from '@actions/core'
 

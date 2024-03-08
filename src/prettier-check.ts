@@ -1,9 +1,9 @@
-import exec from '@actions/exec'
+import { getExecOutput } from '@actions/exec'
 import { notice, warning } from '@actions/core'
 import type { ActionInterface, PrettierResults } from './constants.js'
 
 export async function run(action: ActionInterface): Promise<PrettierResults> {
-  const result = await exec.getExecOutput(action.inputs.formatCommand, [], {
+  const result = await getExecOutput(action.inputs.formatCommand, [], {
     ignoreReturnCode: true,
     silent: true
   })

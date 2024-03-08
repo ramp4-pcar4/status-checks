@@ -1,4 +1,4 @@
-import exec from '@actions/exec'
+import { getExecOutput } from '@actions/exec'
 import { info, warning, startGroup, endGroup, notice } from '@actions/core'
 import type { ActionInterface, LintResults } from './constants.js'
 
@@ -41,7 +41,7 @@ async function compareOutput(
 }
 
 async function lintCheck(command: string): Promise<LintResults> {
-  const result = await exec.getExecOutput(`${command} --format=json`, [], {
+  const result = await getExecOutput(`${command} --format=json`, [], {
     ignoreReturnCode: true,
     silent: true
   })

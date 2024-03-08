@@ -3,7 +3,7 @@ import { run as lintRun } from './lint-check.js'
 import { run as prettierRun } from './prettier-check.js'
 import { DefaultArtifactClient } from '@actions/artifact'
 import { warning, setFailed, setOutput } from '@actions/core'
-import fs from 'fs'
+import { writeFileSync } from 'fs'
 import { findAndExtractArtifact, results } from './lib.js'
 import { createAction } from './constants.js'
 
@@ -28,7 +28,7 @@ results.ts.errors = tsResults.errors
 results.lint = lintResults
 results.prettierWarning = prettierResults.failed
 
-fs.writeFileSync('status-results.json', JSON.stringify(results))
+writeFileSync('status-results.json', JSON.stringify(results))
 await artifactClient.uploadArtifact(action.sha, ['status-results.json'], '.')
 
 setOutput('ts-errors', results.ts.errors)

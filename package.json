@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "ncc build src/main.ts -o dist --source-map ",
-    "typecheck": "tsc ./src/bad-file.ts --pretty",
+    "typecheck": "tsc --pretty",
     "prettiercheck": "prettier . -c",
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
