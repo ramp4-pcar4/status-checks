@@ -18,6 +18,7 @@ export async function run(action: ActionInterface): Promise<LintResults> {
     warning('Lint check failed!')
   } else {
     notice(`Lint check has passed!`)
+    results.failed = false
   }
   return results
 }

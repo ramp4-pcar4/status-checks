@@ -17,6 +17,7 @@ export async function run(action: ActionInterface): Promise<PrettierResults> {
     warning('Prettier check failed!')
   } else {
     notice(`Prettier check has passed!`)
+    output.failed = false
   }
   return output
 }

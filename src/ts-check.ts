@@ -15,6 +15,7 @@ export async function run(action: ActionInterface): Promise<TypeScriptResults> {
     results.failed = true
     warning('TypeScript check failed!')
   } else {
+    results.failed = false
     notice(`Typescript check has passed!`)
   }
   return results
