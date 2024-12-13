@@ -1,6 +1,7 @@
 import { getExecOutput } from '@actions/exec'
 import { info, warning, startGroup, endGroup, notice } from '@actions/core'
 import type { ActionInterface, LintResults } from './constants.js'
+import { readFileSync } from 'fs'
 
 export async function run(action: ActionInterface): Promise<LintResults> {
   let results = await lintCheck(action.inputs.lintCommand)
@@ -41,7 +42,7 @@ async function compareOutput(
 }
 
 async function lintCheck(command: string): Promise<LintResults> {
-  const result = await getExecOutput(`${command} --format=json`, [], {
+  const result = await getExecOutput(command, [], {
     ignoreReturnCode: true,
     silent: true
   })
@@ -54,10 +55,13 @@ async function lintCheck(command: string): Promise<LintResults> {
   let output: LintResults = { errors: 0, warnings: 0, failed: false }
 
   try {
-    const jsonOutput = JSON.parse(result.stdout)
-    for (const file of jsonOutput) {
+    const resultFile = JSON.parse(readFileSync('./results.json', 'utf8'))
+    for (const file of resultFile) {
       output.errors += file.errorCount
       output.warnings += file.warningCount
+    }
+    if (output.errors > 0) {
+      output.failed = true
     }
   } catch (error) {
     console.error('Failed to parse ESLint output:', error)
