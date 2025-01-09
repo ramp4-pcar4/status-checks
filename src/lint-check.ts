@@ -2,6 +2,7 @@ import { getExecOutput } from '@actions/exec'
 import { info, warning, startGroup, endGroup, notice } from '@actions/core'
 import type { ActionInterface, LintResults } from './constants.js'
 import { readFileSync } from 'fs'
+import { join } from 'path'
 
 export async function run(action: ActionInterface): Promise<LintResults> {
   let results = await lintCheck(action)
@@ -56,7 +57,9 @@ async function lintCheck(action: ActionInterface): Promise<LintResults> {
   let output: LintResults = { errors: 0, warnings: 0, failed: false }
 
   try {
-    const resultFile = JSON.parse(readFileSync('./results.json', 'utf8'))
+    const resultFile = JSON.parse(
+      readFileSync(join(action.inputs.path, 'results.json'), 'utf8')
+    )
     for (const file of resultFile) {
       output.errors += file.errorCount
       output.warnings += file.warningCount
