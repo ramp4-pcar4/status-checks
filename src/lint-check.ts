@@ -4,7 +4,7 @@ import type { ActionInterface, LintResults } from './constants.js'
 import { readFileSync } from 'fs'
 
 export async function run(action: ActionInterface): Promise<LintResults> {
-  let results = await lintCheck(action.inputs.lintCommand)
+  let results = await lintCheck(action)
   info(`Lint Results: ${results.errors} errors, ${results.warnings} warnings`)
 
   if (action.inputs.compare) {
@@ -41,10 +41,11 @@ async function compareOutput(
   return results
 }
 
-async function lintCheck(command: string): Promise<LintResults> {
-  const result = await getExecOutput(command, [], {
+async function lintCheck(action: ActionInterface): Promise<LintResults> {
+  const result = await getExecOutput(action.inputs.lintCommand, [], {
     ignoreReturnCode: true,
-    silent: true
+    silent: true,
+    cwd: action.inputs.path
   })
 
   startGroup('Lint Output')

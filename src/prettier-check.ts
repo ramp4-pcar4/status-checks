@@ -5,7 +5,8 @@ import type { ActionInterface, PrettierResults } from './constants.js'
 export async function run(action: ActionInterface): Promise<PrettierResults> {
   const result = await getExecOutput(action.inputs.formatCommand, [], {
     ignoreReturnCode: true,
-    silent: true
+    silent: true,
+    cwd: action.inputs.path
   })
 
   const regex = /\[(warn|error)\]/gm

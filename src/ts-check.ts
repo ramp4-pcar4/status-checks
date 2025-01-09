@@ -3,7 +3,7 @@ import { info, warning, startGroup, endGroup, notice } from '@actions/core'
 import type { ActionInterface, TypeScriptResults } from './constants.js'
 
 export async function run(action: ActionInterface): Promise<TypeScriptResults> {
-  const results = await tsCheck(action.inputs.tsCommand)
+  const results = await tsCheck(action)
   let errorCount = results.errors
 
   if (action.inputs.compare) {
@@ -32,9 +32,10 @@ async function compareErrors(
   return errorCount
 }
 
-async function tsCheck(command: string): Promise<TypeScriptResults> {
-  const result = await getExecOutput(command, [], {
-    ignoreReturnCode: true
+async function tsCheck(action: ActionInterface): Promise<TypeScriptResults> {
+  const result = await getExecOutput(action.inputs.tsCommand, [], {
+    ignoreReturnCode: true,
+    cwd: action.inputs.path
   })
   startGroup('TypeScript Output')
   console.log(result.stdout)

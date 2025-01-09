@@ -2,7 +2,7 @@ name: 'Run status checks!'
 description: 'This action will run eslint, prettier, and TS checks'
 author: 'Miles Petrov <miles.petrov@ec.gc.ca>'
 runs:
-  using: 'node20'
+  using: 'node22'
   main: 'dist/index.js'
 branding:
   icon: 'git-commit'
@@ -12,6 +12,12 @@ inputs:
     description: >
       Provide your GITHUB_TOKEN for api calls.
     required: true
+
+  path:
+    description: >
+      The path to the directory to run the checks on if different from the root directory.
+    required: false
+    default: './'
 
   compare:
     description: >

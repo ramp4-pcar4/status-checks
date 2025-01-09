@@ -27,6 +27,7 @@ export interface PrettierResults {
 export interface ActionInterface {
   octokit: ReturnType<typeof getOctokit>
   inputs: {
+    path: string
     compare: boolean
     tsErrors: number
     tsCommand: string
@@ -49,6 +50,7 @@ export interface ActionInterface {
 export const createAction: () => ActionInterface = () => ({
   octokit: getOctokit(ghToken),
   inputs: {
+    path: getInput('path') || './',
     compare: !isNullOrUndefined(getInput('compare'))
       ? getInput('compare').toLowerCase() === 'true'
       : true,
