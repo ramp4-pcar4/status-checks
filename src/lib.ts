@@ -36,7 +36,11 @@ export async function findAndExtractArtifact(
       'status-results.json',
       action.baseSha
     )
-    return JSON.parse(stringContents)
+    const jsonContents = JSON.parse(stringContents)
+    jsonContents.lint.errors = Math.max(jsonContents.lint.errors, 0)
+    jsonContents.lint.warnings = Math.max(jsonContents.lint.warnings, 0)
+    jsonContents.ts.errors = Math.max(jsonContents.ts.errors, 0)
+    return jsonContents
   }
   notice(`Did not find any artifacts by name: ${action.baseSha}`)
   return null

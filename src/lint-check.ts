@@ -8,20 +8,32 @@ export async function run(action: ActionInterface): Promise<LintResults> {
   let results = await lintCheck(action)
   info(`Lint Results: ${results.errors} errors, ${results.warnings} warnings`)
 
+  // compare the results to the base branch, fail if there are more errors or warnings
   if (action.inputs.compare) {
-    results = await compareOutput(results, action)
+    const compareResults = await compareOutput(results, action)
+
+    if (compareResults.errors > 0 || compareResults.warnings > 0) {
+      results.failed = true
+      warning(
+        `Lint check failed! There is an additional ${compareResults.errors} errors and ${compareResults.warnings} warnings compared to base.`
+      )
+    } else {
+      notice(`Lint check has passed comparison!`)
+      results.failed = false
+    }
+  } else {
+    if (
+      results.errors > action.inputs.lintErrors ||
+      results.warnings > action.inputs.lintWarnings
+    ) {
+      results.failed = true
+      warning('Lint check failed!')
+    } else {
+      notice(`Lint check has passed!`)
+      results.failed = false
+    }
   }
 
-  if (
-    results.errors > action.inputs.lintErrors ||
-    results.warnings > action.inputs.lintWarnings
-  ) {
-    results.failed = true
-    warning('Lint check failed!')
-  } else {
-    notice(`Lint check has passed!`)
-    results.failed = false
-  }
   return results
 }
 
