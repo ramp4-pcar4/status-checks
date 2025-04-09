@@ -73,6 +73,10 @@ async function lintCheck(action: ActionInterface): Promise<LintResults> {
       readFileSync(join(action.inputs.path, 'results.json'), 'utf8')
     )
     for (const file of resultFile) {
+      if (file.errorCount > 0) {
+        info(`File: ${file.filePath} has ${file.errorCount} errors`)
+        info(file)
+      }
       output.errors += file.errorCount
       output.warnings += file.warningCount
     }
